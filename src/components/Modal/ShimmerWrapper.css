@@ -1,0 +1,63 @@
+.shimmer-wrapper {
+  position: relative;
+  border-radius: var(--radius-xl);
+  padding: 2px;
+}
+
+.shimmer-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.shimmer-border::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(0, 212, 170, 0.1) 45deg,
+    rgba(0, 212, 170, 0.3) 90deg,
+    rgba(0, 212, 170, 0.5) 135deg,
+    rgba(0, 212, 170, 0.3) 180deg,
+    rgba(0, 212, 170, 0.1) 225deg,
+    transparent 270deg,
+    transparent 360deg
+  );
+  animation: rotateShimmer 4s linear infinite;
+}
+
+.shimmer-border-inner {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: inherit;
+  background: var(--color-bg-secondary);
+}
+
+.shimmer-content {
+  position: relative;
+  z-index: 1;
+  background: var(--color-bg-secondary);
+  border-radius: calc(var(--radius-xl) - 2px);
+  padding: var(--spacing-xl);
+}
+
+@keyframes rotateShimmer {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

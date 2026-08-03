@@ -1,0 +1,140 @@
+.zab-database-page {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.btn-download {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.btn-download:hover {
+  background: var(--color-glow-primary);
+  transform: translateY(-2px);
+}
+
+.stat-value.status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.stat-value.used {
+  color: var(--color-text-secondary);
+}
+
+.zab-grid {
+  overflow: hidden;
+  animation: cardAppear 0.5s ease;
+}
+
+.zab-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.zab-list-header {
+  display: grid;
+  grid-template-columns: 60px 2fr 1fr 1fr;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border-bottom: 2px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.zab-header-item {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.zab-item {
+  display: grid;
+  grid-template-columns: 60px 2fr 1fr 1fr;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+  align-items: center;
+}
+
+.zab-item:hover {
+  background: rgba(0, 212, 170, 0.03);
+}
+
+.zab-item.available {
+  border-left: 3px solid var(--color-success);
+}
+
+.zab-item.used {
+  border-left: 3px solid var(--color-text-tertiary);
+  opacity: 0.6;
+}
+
+.zab-item.duplicate {
+  border-left: 3px solid var(--color-error) !important;
+  animation: blink-red 1s ease-in-out infinite;
+}
+
+.zab-index {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}
+
+.zab-number {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  letter-spacing: 1px;
+}
+
+.zab-status {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.zab-status.available {
+  color: var(--color-success);
+}
+
+.zab-status.used {
+  color: var(--color-text-tertiary);
+}
+
+.zab-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .zab-list-header,
+  .zab-item {
+    grid-template-columns: 40px 2fr 1fr;
+  }
+  
+  .zab-header-item:last-child,
+  .zab-date {
+    display: none;
+  }
+}
