@@ -1,16 +1,18 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import './Sidebar.css'
 
-function Sidebar({ collapsed, onToggle, currentUser }) {
+function Sidebar({ collapsed, onToggle }) {
   const location = useLocation()
+  const { currentUser, canDelete, logout } = useAuth()
 
   const menuItems = [
     {
       path: '/tower-sent',
       label: 'TOWERS SENT',
       icon: '',
-      description: 'Concentrado de envíos'
+      description: 'Concentrado de envios'
     },
     {
       path: '/zab-database-normal',
@@ -34,18 +36,18 @@ function Sidebar({ collapsed, onToggle, currentUser }) {
           {!collapsed && (
             <div className="logo-text">
               <span className="logo-title">MODULO VTT</span>
-              <span className="logo-subtitle">Sistema de Gestión</span>
+              <span className="logo-subtitle">Sistema de Gestion</span>
             </div>
           )}
         </div>
         <button className="sidebar-toggle" onClick={onToggle}>
-          {collapsed ? '→' : '←'}
+          {collapsed ? '>' : '<'}
         </button>
       </div>
 
       <nav className="sidebar-nav">
         <div className="nav-section">
-          {!collapsed && <h3 className="nav-section-title">MENÚ PRINCIPAL</h3>}
+          {!collapsed && <h3 className="nav-section-title">MENU PRINCIPAL</h3>}
           <ul className="nav-list">
             {menuItems.map((item) => (
               <li key={item.path}>
@@ -73,7 +75,7 @@ function Sidebar({ collapsed, onToggle, currentUser }) {
         </div>
 
         <div className="nav-section nav-section-divider">
-          {!collapsed && <h3 className="nav-section-title">ACCIONES RÁPIDAS</h3>}
+          {!collapsed && <h3 className="nav-section-title">ACCIONES RAPIDAS</h3>}
           <ul className="nav-list">
             <li>
               <button 
@@ -81,11 +83,11 @@ function Sidebar({ collapsed, onToggle, currentUser }) {
                 onClick={() => window.dispatchEvent(new CustomEvent('openModalShipping'))}
                 title={collapsed ? 'Modal Shipping' : ''}
               >
-                <span className="nav-icon"></span>
+                <span className="nav-icon">+</span>
                 {!collapsed && (
                   <div className="nav-text">
                     <span className="nav-label">MODAL SHIPPING</span>
-                    <span className="nav-description">Nuevo envío</span>
+                    <span className="nav-description">Nuevo envio</span>
                   </div>
                 )}
               </button>
@@ -103,9 +105,30 @@ function Sidebar({ collapsed, onToggle, currentUser }) {
             <div className="user-details">
               <span className="user-name">{currentUser?.name || 'Usuario'}</span>
               <span className="user-role">
-                {currentUser?.email === process.env.REACT_APP_ADMIN_EMAIL ? 'Administrador' : 'Usuario'}
+                {canDelete() ? 'Administrador' : 'Usuario'}
               </span>
             </div>
+            <button 
+              className="btn-logout" 
+              onClick={logout} 
+              title="Cerrar sesion"
+              style={{
+                background: 'none',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'white',
+                borderRadius: '50%',
+                width: '28px',
+                height: '28px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: '8px'
+              }}
+            >
+            
+            </button>
           </div>
         )}
       </div>

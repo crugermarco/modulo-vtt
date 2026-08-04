@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { towerSentService } from '../../services/towerSentService'
 import { zabDatabaseService } from '../../services/zabDatabaseService'
-import { isAdmin } from '../../services/supabaseClient'
+import { useAuth } from '../../context/AuthContext'
 import { validators } from '../../utils/validators'
 import ModalShipping from '../Modal/ModalShipping'
 import DataTable from '../Tables/DataTable'
 import toast from 'react-hot-toast'
 import './TowerSent.css'
 
-function TowerSent({ currentUser, duplicateZabs }) {
+function TowerSent({ duplicateZabs }) {
+  const { currentUser, canEdit, canDelete } = useAuth()
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [selectedRows, setSelectedRows] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [editValues, setEditValues] = useState({})
-  const adminUser = isAdmin(currentUser?.email)
 
   const loadRecords = useCallback(async () => {
     try {
@@ -80,12 +80,14 @@ function TowerSent({ currentUser, duplicateZabs }) {
   }, [records])
 
   const handleDelete = useCallback(async (id) => {
-    if (!adminUser) {
-      toast.error('Solo el administrador puede eliminar registros')
+    if (!canDelete()) {
+      toast.error('Solo Marco Cruger puede eliminar registros')
       return
     }
+
     const confirmed = window.confirm('Esta seguro de eliminar este registro?')
     if (!confirmed) return
+
     try {
       await towerSentService.delete(id)
       toast.success('Registro eliminado exitosamente')
@@ -93,11 +95,11 @@ function TowerSent({ currentUser, duplicateZabs }) {
     } catch (error) {
       toast.error('Error al eliminar registro')
     }
-  }, [adminUser, loadRecords])
+  }, [loadRecords, canDelete])
 
   const handleStartEdit = useCallback((record) => {
-    if (!adminUser) {
-      toast.error('Solo el administrador puede modificar registros')
+    if (!canEdit()) {
+      toast.error('Solo Marco Cruger puede modificar registros')
       return
     }
     setEditingId(record.id)
@@ -110,7 +112,7 @@ function TowerSent({ currentUser, duplicateZabs }) {
       customer: record.customer || '',
       fecha: record.fecha || ''
     })
-  }, [adminUser])
+  }, [canEdit])
 
   const handleSaveEdit = useCallback(async (id) => {
     try {
@@ -140,62 +142,17 @@ function TowerSent({ currentUser, duplicateZabs }) {
           position: fixed; top: 0; left: 0; width: 100%; height: 100%;
           background: rgba(0, 0, 0, 0.95); display: flex; align-items: center;
           justify-content: center; z-index: 99999; cursor: pointer;
-          backdrop-filter: blur(5px);
-        `
-
-        const container = document.createElement('div')
-        container.style.cssText = `
-          position: relative; max-width: 90vw; max-height: 90vh;
-          display: flex; flex-direction: column; align-items: center; gap: 16px;
         `
 
         const img = document.createElement('img')
         img.src = imageUrl
         img.style.cssText = `
-          max-width: 90vw; max-height: 75vh; object-fit: contain;
-          border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+          max-width: 90vw; max-height: 90vh; object-fit: contain;
+          border-radius: 12px;
         `
 
-        const closeBtn = document.createElement('button')
-        closeBtn.textContent = 'X'
-        closeBtn.style.cssText = `
-          position: absolute; top: -20px; right: -20px;
-          background: rgba(239, 68, 68, 0.9); color: white; border: none;
-          width: 40px; height: 40px; border-radius: 50%; font-size: 20px;
-          cursor: pointer; display: flex; align-items: center;
-          justify-content: center; transition: all 0.3s; z-index: 2;
-        `
-
-        const downloadBtn = document.createElement('button')
-        downloadBtn.textContent = 'Descargar Imagen'
-        downloadBtn.style.cssText = `
-          background: rgba(0, 212, 170, 0.9); color: #0a0a0f; border: none;
-          padding: 12px 24px; border-radius: 8px; font-size: 14px;
-          font-weight: 700; cursor: pointer; transition: all 0.3s;
-        `
-        downloadBtn.onclick = (e) => {
-          e.stopPropagation()
-          const a = document.createElement('a')
-          a.href = imageUrl
-          a.download = `torre_${towerId}.jpg`
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-        }
-
-        container.appendChild(closeBtn)
-        container.appendChild(img)
-        container.appendChild(downloadBtn)
-        overlay.appendChild(container)
-
-        overlay.onclick = (e) => {
-          if (e.target === overlay) document.body.removeChild(overlay)
-        }
-        closeBtn.onclick = (e) => {
-          e.stopPropagation()
-          document.body.removeChild(overlay)
-        }
-
+        overlay.appendChild(img)
+        overlay.onclick = () => document.body.removeChild(overlay)
         document.body.appendChild(overlay)
       } else {
         toast.error('No hay imagen disponible')
@@ -221,7 +178,9 @@ function TowerSent({ currentUser, duplicateZabs }) {
       <div className="page-header">
         <div className="header-content">
           <h1 className="page-title">TOWERS SENT</h1>
-          <p className="page-description">Concentrado de todas las torres enviadas</p>
+          <p className="page-description">
+            Concentrado de todas las torres enviadas | Usuario: {currentUser?.name}
+          </p>
         </div>
         <div className="header-actions">
           <button className="btn-primary" onClick={() => setShowModal(true)}>
@@ -273,7 +232,7 @@ function TowerSent({ currentUser, duplicateZabs }) {
             onCancelEdit={handleCancelEdit}
             onDelete={handleDelete}
             onViewImage={handleViewImage}
-            isAdmin={adminUser}
+            isAdmin={canDelete()}
             onEditChange={(field, value) => setEditValues(prev => ({ ...prev, [field]: value }))}
           />
         )}

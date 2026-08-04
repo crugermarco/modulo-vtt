@@ -4,17 +4,14 @@ import { Toaster } from 'react-hot-toast'
 import MainLayout from './components/Layout/MainLayout'
 import TowerSent from './components/Dashboard/TowerSent'
 import ZabDatabase from './components/Dashboard/ZabDatabase'
+import { useAuth } from './context/AuthContext'
 import { subscribeToZabChanges } from './services/supabaseClient'
 import './App.css'
 
 function App() {
+  const { currentUser } = useAuth()
   const [duplicateAlerts, setDuplicateAlerts] = useState([])
-  const [currentUser, setCurrentUser] = useState({
-    email: 'marco.cruger@example.com', // Simulado - implementar auth real
-    name: 'Marco Cruger'
-  })
 
-  // Suscripción en tiempo real para detectar duplicados
   React.useEffect(() => {
     const unsubscribe = subscribeToZabChanges((payload) => {
       if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
@@ -75,18 +72,17 @@ function App() {
           }}
         />
         
-        {/* Alertas de duplicados */}
         {duplicateAlerts.length > 0 && (
           <div className="duplicate-alerts">
             {duplicateAlerts.map(alert => (
               <div key={alert.id} className="alert-item pulse-notification">
-                <span className="alert-icon">⚠️</span>
+                <span className="alert-icon">!</span>
                 <span className="alert-message">{alert.message}: {alert.zabNumber}</span>
                 <button 
                   className="alert-dismiss"
                   onClick={() => dismissAlert(alert.id)}
                 >
-                  ×
+                  X
                 </button>
               </div>
             ))}
@@ -97,29 +93,23 @@ function App() {
           <Route 
             path="/" 
             element={
-              <MainLayout currentUser={currentUser}>
-                <TowerSent 
-                  currentUser={currentUser}
-                  duplicateZabs={duplicateAlerts.map(a => a.zabNumber)}
-                />
+              <MainLayout>
+                <TowerSent duplicateZabs={duplicateAlerts.map(a => a.zabNumber)} />
               </MainLayout>
             } 
           />
           <Route 
             path="/tower-sent" 
             element={
-              <MainLayout currentUser={currentUser}>
-                <TowerSent 
-                  currentUser={currentUser}
-                  duplicateZabs={duplicateAlerts.map(a => a.zabNumber)}
-                />
+              <MainLayout>
+                <TowerSent duplicateZabs={duplicateAlerts.map(a => a.zabNumber)} />
               </MainLayout>
             } 
           />
           <Route 
             path="/zab-database-normal" 
             element={
-              <MainLayout currentUser={currentUser}>
+              <MainLayout>
                 <ZabDatabase 
                   tableName="zab_database_normal"
                   title="ZAB DATA BASE - NORMAL"
@@ -131,7 +121,7 @@ function App() {
           <Route 
             path="/zab-database-ada" 
             element={
-              <MainLayout currentUser={currentUser}>
+              <MainLayout>
                 <ZabDatabase 
                   tableName="zab_database_ada"
                   title="ZAB DATA BASE - ADA"
