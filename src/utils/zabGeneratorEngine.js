@@ -25,6 +25,9 @@ export class ZABGeneratorEngine {
   }
 
   extractCounterFromZab(zab) {
+    // Extraer el contador numérico del ZAB
+    // Ejemplo: ZAB300005A -> 300005
+    if (!zab || zab.length < 9) return 300000
     return parseInt(zab.substring(3, 9))
   }
 
@@ -69,8 +72,16 @@ export class ZABGeneratorEngine {
 
   // Obtener el siguiente contador basado en el último ZAB
   getNextCounter(lastZab) {
-    if (!lastZab) return 300000
+    console.log('getNextCounter - lastZab recibido:', lastZab)
+    
+    if (!lastZab) {
+      console.log('No hay último ZAB, iniciando desde 300000')
+      return 300000
+    }
+    
     const counter = this.extractCounterFromZab(lastZab)
-    return counter + 1
+    const nextCounter = counter + 1
+    console.log(`Contador actual: ${counter}, Siguiente: ${nextCounter}`)
+    return nextCounter
   }
 }

@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import './ZabGeneratorModal.css'
 
 function ZabGeneratorModal({ isOpen, onClose, tableName }) {
+  const [lastZabInput, setLastZabInput] = useState('') // ZAB que el usuario ingresa manualmente
   const [quantity, setQuantity] = useState(1)
   const [targetTable, setTargetTable] = useState(tableName || 'zab_database_normal')
   const [loading, setLoading] = useState(false)
@@ -14,6 +15,18 @@ function ZabGeneratorModal({ isOpen, onClose, tableName }) {
   const generator = new ZABGeneratorEngine()
 
   const handleGenerate = async () => {
+    // Validar que se haya ingresado un ZAB
+    if (!lastZabInput.trim()) {
+      toast.error('Debes ingresar el último ZAB que tienes')
+      return
+    }
+
+    // Validar formato del ZAB ingresado
+    if (!generator.validateZabFormat(lastZabInput.trim().toUpperCase())) {
+      toast.error('El formato del ZAB no es válido. Debe ser: ZAB + 6 dígitos + 1 carácter (Ej: ZAB300000A)')
+      return
+    }
+
     if (quantity < 1 || quantity > 1000) {
       toast.error('La cantidad debe ser entre 1 y 1000')
       return
@@ -23,22 +36,32 @@ function ZabGeneratorModal({ isOpen, onClose, tableName }) {
     setGeneratedCodes([])
 
     try {
-      // Obtener último ZAB de la tabla destino
-      const lastZab = await zabDatabaseService.getLastZab(targetTable)
-      const nextCounter = generator.getNextCounter(lastZab)
+      const cleanZab = lastZabInput.trim().toUpperCase()
+      
+      console.log('=== INICIANDO GENERACIÓN DE ZABs ===')
+      console.log('Último ZAB ingresado:', cleanZab)
+      console.log('Tabla destino:', targetTable)
+      console.log('Cantidad a generar:', quantity)
+      
+      // Obtener el siguiente contador desde el ZAB ingresado
+      const nextCounter = generator.getNextCounter(cleanZab)
+      console.log('Siguiente contador:', nextCounter)
 
       // Generar códigos
       const result = generator.generateCodes(nextCounter, quantity)
+      console.log('Códigos generados:', result.codes.map(c => c.code))
       
       // Guardar en la base de datos
       const codes = result.codes.map(c => c.code)
       await zabDatabaseService.insertZabs(targetTable, codes)
 
       setGeneratedCodes(codes)
-      toast.success(`${codes.length} ZABs generados exitosamente`)
+      
+      toast.success(`${codes.length} ZABs generados y guardados en ${targetTable === 'zab_database_normal' ? 'NORMAL' : 'ADA'}`)
+      console.log('=== GENERACIÓN COMPLETADA ===')
 
     } catch (error) {
-      console.error('Error generating ZABs:', error)
+      console.error('Error detallado:', error)
       toast.error('Error al generar ZABs: ' + error.message)
     } finally {
       setLoading(false)
@@ -50,6 +73,12 @@ function ZabGeneratorModal({ isOpen, onClose, tableName }) {
     navigator.clipboard.writeText(text).then(() => {
       toast.success('ZABs copiados al portapapeles')
     })
+  }
+
+  const handleClear = () => {
+    setLastZabInput('')
+    setQuantity(1)
+    setGeneratedCodes([])
   }
 
   if (!isOpen) return null
@@ -65,8 +94,32 @@ function ZabGeneratorModal({ isOpen, onClose, tableName }) {
             </div>
 
             <div className="generator-form">
+              {/* Input para el último ZAB */}
               <div className="form-group">
-                <label className="form-label">Tabla Destino:</label>
+                <label className="form-label">
+                  Último ZAB que tienes:
+                  <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={lastZabInput}
+                  onChange={(e) => setLastZabInput(e.target.value.toUpperCase())}
+                  placeholder="Ejemplo: ZAB300000A"
+                  className="input-premium zab-input"
+                  maxLength={10}
+                  autoFocus
+                />
+                <small className="form-hint">
+                  Ingresa el último código ZAB que tienes registrado
+                </small>
+              </div>
+
+              {/* Selección de tabla destino */}
+              <div className="form-group">
+                <label className="form-label">
+                  Guardar en:
+                  <span className="required">*</span>
+                </label>
                 <select
                   value={targetTable}
                   onChange={(e) => setTargetTable(e.target.value)}
@@ -77,8 +130,12 @@ function ZabGeneratorModal({ isOpen, onClose, tableName }) {
                 </select>
               </div>
 
+              {/* Cantidad a generar */}
               <div className="form-group">
-                <label className="form-label">Cantidad a Generar (1-1000):</label>
+                <label className="form-label">
+                  Cantidad a Generar:
+                  <span className="required">*</span>
+                </label>
                 <input
                   type="number"
                   value={quantity}
@@ -87,28 +144,62 @@ function ZabGeneratorModal({ isOpen, onClose, tableName }) {
                   min="1"
                   max="1000"
                 />
+                <small className="form-hint">
+                  Mínimo 1, máximo 1000 ZABs
+                </small>
               </div>
 
-              <button
-                className="btn-primary btn-generate"
-                onClick={handleGenerate}
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Generando...
-                  </>
-                ) : (
-                  '🔢 Generar ZABs'
-                )}
-              </button>
+              {/* Vista previa del siguiente ZAB */}
+              {lastZabInput.trim() && generator.validateZabFormat(lastZabInput.trim().toUpperCase()) && (
+                <div className="preview-info">
+                  <div className="preview-item">
+                    <span className="preview-label">Último ZAB:</span>
+                    <span className="preview-value">{lastZabInput.trim().toUpperCase()}</span>
+                  </div>
+                  <div className="preview-item">
+                    <span className="preview-label">Siguiente contador:</span>
+                    <span className="preview-value next">
+                      {generator.getNextCounter(lastZabInput.trim().toUpperCase())}
+                    </span>
+                  </div>
+                  <div className="preview-item">
+                    <span className="preview-label">Se generarán:</span>
+                    <span className="preview-value quantity">{quantity} ZABs</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Botones de acción */}
+              <div className="generator-buttons">
+                <button
+                  className="btn-primary btn-generate"
+                  onClick={handleGenerate}
+                  disabled={loading || !lastZabInput.trim()}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner"></span>
+                      Generando...
+                    </>
+                  ) : (
+                    '🔢 Generar ZABs'
+                  )}
+                </button>
+                <button
+                  className="btn-clear"
+                  onClick={handleClear}
+                  disabled={loading}
+                >
+                  🧹 Limpiar
+                </button>
+              </div>
             </div>
 
+            {/* Resultados generados */}
             {generatedCodes.length > 0 && (
               <div className="generated-codes-section">
                 <div className="codes-header">
-                  <h3>ZABs Generados ({generatedCodes.length})</h3>
+                  <h3>✅ ZABs Generados ({generatedCodes.length})</h3>
                   <button 
                     className="btn-copy-all"
                     onClick={handleCopyAll}
@@ -125,7 +216,7 @@ function ZabGeneratorModal({ isOpen, onClose, tableName }) {
                         className="btn-copy-one"
                         onClick={() => {
                           navigator.clipboard.writeText(code)
-                          toast.success('Copiado!')
+                          toast.success('¡Copiado!')
                         }}
                       >
                         📋
@@ -136,13 +227,15 @@ function ZabGeneratorModal({ isOpen, onClose, tableName }) {
               </div>
             )}
 
+            {/* Información del generador */}
             <div className="generator-info">
-              <h4>Información del Generador</h4>
+              <h4>📝 Instrucciones</h4>
               <ul>
-                <li>Los ZABs se generan secuencialmente desde el último registrado</li>
-                <li>Formato: ZAB + 6 dígitos + 1 dígito verificador</li>
-                <li>El dígito verificador se calcula con algoritmo ponderado</li>
-                <li>Base: 36 caracteres (0-9, A-Z)</li>
+                <li>Ingresa el <strong>último código ZAB</strong> que tienes registrado</li>
+                <li>Selecciona en qué <strong>base de datos</strong> se guardarán (NORMAL o ADA)</li>
+                <li>Define <strong>cuántos ZABs</strong> necesitas generar</li>
+                <li>Los nuevos ZABs se generarán a partir del siguiente al que ingresaste</li>
+                <li>Formato: <strong>ZAB + 6 dígitos + 1 dígito verificador</strong></li>
               </ul>
             </div>
           </div>

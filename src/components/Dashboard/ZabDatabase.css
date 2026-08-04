@@ -138,3 +138,261 @@
     display: none;
   }
 }
+
+.zab-database-page {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.btn-download {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.btn-download:hover {
+  background: var(--color-glow-primary);
+  transform: translateY(-2px);
+}
+
+/* Stats Cards */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.stat-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  transition: all var(--transition-base);
+}
+
+.stat-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-glow);
+}
+
+.stat-card.available {
+  border-left: 3px solid var(--color-success);
+}
+
+.stat-card.used-card {
+  border-left: 3px solid var(--color-error);
+}
+
+.stat-card.status-card {
+  border-left: 3px solid var(--color-warning);
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-accent-primary);
+}
+
+.stat-value.used-count {
+  color: var(--color-error);
+}
+
+.stat-value.status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-btn:hover {
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
+}
+
+.filter-btn.active {
+  background: var(--color-accent-primary);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-primary);
+  font-weight: 700;
+}
+
+.filter-btn.available.active {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.filter-btn.used.active {
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+/* ZAB Grid */
+.zab-grid {
+  overflow: hidden;
+  animation: cardAppear 0.5s ease;
+}
+
+.zab-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.zab-list-header {
+  display: grid;
+  grid-template-columns: 50px 2fr 1fr 1fr 1fr;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border-bottom: 2px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.zab-header-item {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.zab-item {
+  display: grid;
+  grid-template-columns: 50px 2fr 1fr 1fr 1fr;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+  align-items: center;
+}
+
+.zab-item:hover {
+  background: rgba(0, 212, 170, 0.03);
+}
+
+/* ZAB Disponible - Verde */
+.zab-item.available-item {
+  border-left: 3px solid var(--color-success);
+}
+
+/* ZAB Utilizado - Rojo */
+.zab-item.used-item {
+  border-left: 3px solid var(--color-error);
+  background: rgba(239, 68, 68, 0.05);
+  opacity: 0.85;
+}
+
+.zab-item.used-item .zab-number {
+  color: var(--color-error);
+  text-decoration: line-through;
+}
+
+/* ZAB Duplicado */
+.zab-item.duplicate {
+  border-left: 3px solid var(--color-warning) !important;
+  animation: blink-warning 1s ease-in-out infinite;
+  background: rgba(251, 191, 36, 0.1);
+}
+
+@keyframes blink-warning {
+  0%, 100% { background: rgba(251, 191, 36, 0.05); }
+  50% { background: rgba(251, 191, 36, 0.15); }
+}
+
+.zab-index {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}
+
+.zab-number {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  letter-spacing: 1px;
+  transition: color var(--transition-fast);
+}
+
+.zab-status-badge {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.zab-status-badge.available {
+  background: rgba(0, 212, 170, 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(0, 212, 170, 0.3);
+}
+
+.zab-status-badge.used {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.zab-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .zab-list-header,
+  .zab-item {
+    grid-template-columns: 40px 2fr 1fr;
+  }
+  
+  .zab-header-item:nth-child(4),
+  .zab-header-item:nth-child(5),
+  .zab-date:nth-child(4),
+  .zab-date:nth-child(5) {
+    display: none;
+  }
+}
