@@ -9,19 +9,19 @@ function Sidebar({ collapsed, onToggle, currentUser }) {
     {
       path: '/tower-sent',
       label: 'TOWERS SENT',
-      icon: '🏗️',
+      icon: '',
       description: 'Concentrado de envíos'
     },
     {
       path: '/zab-database-normal',
       label: 'ZAB DATA BASE - NORMAL',
-      icon: '📊',
+      icon: '',
       description: 'Base de datos ZAB Normal'
     },
     {
       path: '/zab-database-ada',
       label: 'ZAB DATA BASE - ADA',
-      icon: '📋',
+      icon: '',
       description: 'Base de datos ZAB ADA'
     }
   ]
@@ -81,7 +81,7 @@ function Sidebar({ collapsed, onToggle, currentUser }) {
                 onClick={() => window.dispatchEvent(new CustomEvent('openModalShipping'))}
                 title={collapsed ? 'Modal Shipping' : ''}
               >
-                <span className="nav-icon">📦</span>
+                <span className="nav-icon"></span>
                 {!collapsed && (
                   <div className="nav-text">
                     <span className="nav-label">MODAL SHIPPING</span>

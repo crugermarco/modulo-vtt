@@ -164,7 +164,7 @@ function TowerSent({ currentUser, duplicateZabs }) {
             className="btn-primary"
             onClick={() => setShowModal(true)}
           >
-            <span className="btn-icon">📦</span>
+            <span className="btn-icon"></span>
             Modal Shipping
           </button>
           <button 
@@ -172,7 +172,7 @@ function TowerSent({ currentUser, duplicateZabs }) {
             onClick={loadRecords}
             disabled={loading}
           >
-            🔄 Actualizar
+             Actualizar
           </button>
         </div>
       </div>
@@ -202,7 +202,7 @@ function TowerSent({ currentUser, duplicateZabs }) {
           </div>
         ) : records.length === 0 ? (
           <div className="empty-state">
-            <span className="empty-icon">📭</span>
+            <span className="empty-icon"></span>
             <h3>No hay registros</h3>
             <p>Utilice el Modal Shipping para agregar nuevos envíos</p>
           </div>

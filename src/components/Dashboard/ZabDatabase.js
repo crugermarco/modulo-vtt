@@ -69,21 +69,21 @@ function ZabDatabase({ tableName, title, duplicateZabs }) {
             className="btn-primary"
             onClick={() => setShowGenerator(true)}
           >
-            <span className="btn-icon">🔢</span>
+            <span className="btn-icon"></span>
             Generar ZAB
           </button>
           <button 
             className="btn-download"
             onClick={handleDownloadCSV}
           >
-            📥 Descargar CSV
+             Descargar CSV
           </button>
           <button 
             className="btn-refresh"
             onClick={loadZabs}
             disabled={loading}
           >
-            🔄 Actualizar
+             Actualizar
           </button>
         </div>
       </div>
@@ -128,7 +128,7 @@ function ZabDatabase({ tableName, title, duplicateZabs }) {
           </div>
         ) : zabs.length === 0 ? (
           <div className="empty-state">
-            <span className="empty-icon">🔢</span>
+            <span className="empty-icon"></span>
             <h3>No hay ZABs generados</h3>
             <p>Utilice el botón "Generar ZAB" para crear nuevos códigos</p>
           </div>

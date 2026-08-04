@@ -136,11 +136,13 @@
 .nav-link:hover {
   background: var(--color-bg-tertiary);
   color: var(--color-text-primary);
+  text-decoration: underline;
 }
 
 .nav-link.active {
   background: var(--color-glow-primary);
   color: var(--color-accent-primary);
+  text-shadow: 0 0 8px var(--color-accent-secondary);
 }
 
 .nav-icon {
@@ -186,8 +188,8 @@
 
 .btn-modal-shipping:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
-  color: var(--color-bg-primary) !important;
+  box-shadow: 0 8px 54px rgba(3, 240, 192, 0.3);
+  color: var(--color-text-primary) !important;
 }
 
 .sidebar-footer {
