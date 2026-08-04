@@ -81,7 +81,7 @@ export const zabDatabaseService = {
     return data
   },
 
-  // Marcar ZAB como usado (cuando se usa en tower_sent)
+  // Marcar ZAB como usado
   async markAsUsed(tableName, zabNumber, towerSentId) {
     const { data, error } = await supabase
       .from(tableName)
@@ -102,7 +102,7 @@ export const zabDatabaseService = {
     return data
   },
 
-  // Marcar ZAB como disponible (si se elimina de tower_sent)
+  // Marcar ZAB como disponible
   async markAsAvailable(tableName, zabNumber) {
     const { data, error } = await supabase
       .from(tableName)
@@ -150,25 +150,49 @@ export const zabDatabaseService = {
     return count || 0
   },
 
-  // Verificar duplicado en todas las tablas
+  // Verificar duplicado en todas las tablas - CORREGIDO
   async checkDuplicateGlobally(zabNumber) {
-    const tables = ['tower_sent', 'zab_database_normal', 'zab_database_ada']
     const results = {}
 
-    for (const table of tables) {
-      const { data, error } = await supabase
-        .from(table)
+    try {
+      // Verificar en tower_sent (sin columna status)
+      const { data: towerData, error: towerError } = await supabase
+        .from('tower_sent')
+        .select('id, zab_number')
+        .eq('zab_number', zabNumber)
+      
+      if (towerError) {
+        console.error('Error checking duplicates in tower_sent:', towerError)
+      } else if (towerData && towerData.length > 0) {
+        results['tower_sent'] = towerData
+      }
+
+      // Verificar en zab_database_normal
+      const { data: normalData, error: normalError } = await supabase
+        .from('zab_database_normal')
         .select('id, zab_number, status')
         .eq('zab_number', zabNumber)
       
-      if (error) {
-        console.error(`Error checking duplicates in ${table}:`, error)
-        continue
+      if (normalError) {
+        console.error('Error checking duplicates in zab_database_normal:', normalError)
+      } else if (normalData && normalData.length > 0) {
+        results['zab_database_normal'] = normalData
       }
+
+      // Verificar en zab_database_ada
+      const { data: adaData, error: adaError } = await supabase
+        .from('zab_database_ada')
+        .select('id, zab_number, status')
+        .eq('zab_number', zabNumber)
       
-      if (data && data.length > 0) {
-        results[table] = data
+      if (adaError) {
+        console.error('Error checking duplicates in zab_database_ada:', adaError)
+      } else if (adaData && adaData.length > 0) {
+        results['zab_database_ada'] = adaData
       }
+
+    } catch (error) {
+      console.error('Error general en checkDuplicateGlobally:', error)
     }
 
     return results
