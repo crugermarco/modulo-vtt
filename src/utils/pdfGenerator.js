@@ -86,7 +86,7 @@ function createSheetHTML(formData, rows) {
         body { 
           font-family: 'Times New Roman', Arial, sans-serif; 
           background: #ffffff;
-          padding: 20px;
+          padding: 40px 56px;
           margin: 0;
         }
         
@@ -313,11 +313,13 @@ function createSheetHTML(formData, rows) {
         
         .waffle {
             border-collapse: collapse;
+             margin: 0 auto;
         }
       </style>
     </head>
     <body>
-      <table class="waffle" cellspacing="0" cellpadding="0">
+      <!-- Cambia el width al tamaño exacto del contenido seguro -->
+      <table class="waffle" style="width: 938px; table-layout: fixed;" cellspacing="0" cellpadding="0">
         <tbody>
           <tr style="height: 22px">
             <td class="s0" colspan="4">${customer}</td>
