@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      // 1. Intentar obtener usuario de la URL
       const urlParams = new URLSearchParams(window.location.search)
       const userParam = urlParams.get('user')
       
@@ -26,7 +25,7 @@ export const AuthProvider = ({ children }) => {
         const user = JSON.parse(decodedUser)
         
         if (!user.USUARIO || !user.ROL) {
-          setError('Usuario invalido: faltan datos (USUARIO, ROL)')
+          setError('ACCESO DENEGADO')
           setLoading(false)
           return
         }
@@ -49,7 +48,6 @@ export const AuthProvider = ({ children }) => {
         return
       }
       
-      // 2. Intentar obtener usuario de localStorage
       const userSession = localStorage.getItem('userSession')
       
       if (userSession) {
@@ -57,7 +55,7 @@ export const AuthProvider = ({ children }) => {
         
         if (!user.USUARIO || !user.ROL) {
           localStorage.removeItem('userSession')
-          setError('Sesion invalida. Inicie sesion nuevamente.')
+          setError('ACCESO DENEGADO')
           setLoading(false)
           return
         }
@@ -71,51 +69,43 @@ export const AuthProvider = ({ children }) => {
         return
       }
       
-      // 3. No hay usuario - ACCESO DENEGADO
-      setError('ACCESO NO AUTORIZADO')
+      setError('ACCESO DENEGADO')
       setLoading(false)
       
     } catch (err) {
-      console.error('Error en AuthProvider:', err)
       localStorage.removeItem('userSession')
-      setError('Error al cargar la sesion: ' + err.message)
+      setError('ACCESO DENEGADO')
       setLoading(false)
     }
   }, [])
 
-  // Verificar si es usuario autorizado
   const isAuthorizedUser = useCallback(() => {
     if (!currentUser) return false
     const name = currentUser.name?.toLowerCase() || ''
     return name === 'marco cruger' || name === 'itati bautista'
   }, [currentUser])
 
-  // Verificar si puede EDITAR (solo Marco Cruger)
   const canEdit = useCallback(() => {
     if (!currentUser) return false
     return currentUser.name?.toLowerCase() === 'marco cruger'
   }, [currentUser])
 
-  // Verificar si puede ELIMINAR (solo Marco Cruger)
   const canDelete = useCallback(() => {
     if (!currentUser) return false
     return currentUser.name?.toLowerCase() === 'marco cruger'
   }, [currentUser])
 
-  // Verificar si es administrador
   const isAdmin = useCallback(() => {
     if (!currentUser) return false
     return currentUser.role === 'admin' || currentUser.name?.toLowerCase() === 'marco cruger'
   }, [currentUser])
 
-  // Cerrar sesion
   const logout = useCallback(() => {
     localStorage.removeItem('userSession')
     setCurrentUser(null)
-    setError('Sesion cerrada')
+    setError('ACCESO DENEGADO')
   }, [])
 
-  // Pantalla de carga
   if (loading) {
     return (
       <div style={{
@@ -144,7 +134,6 @@ export const AuthProvider = ({ children }) => {
     )
   }
 
-  // Pantalla de error / acceso denegado
   if (error || !currentUser) {
     return (
       <div style={{
@@ -156,7 +145,7 @@ export const AuthProvider = ({ children }) => {
         color: 'white',
         fontFamily: 'Inter, sans-serif'
       }}>
-        <div style={{ textAlign: 'center', maxWidth: 480, padding: 40 }}>
+        <div style={{ textAlign: 'center', maxWidth: 400, padding: 40 }}>
           <div style={{
             width: 80,
             height: 80,
@@ -179,62 +168,18 @@ export const AuthProvider = ({ children }) => {
             fontWeight: 700, 
             color: '#ef4444',
             marginBottom: 16,
-            letterSpacing: 1
+            letterSpacing: 2
           }}>
             ACCESO DENEGADO
           </h1>
           
           <p style={{ 
             fontSize: 16, 
-            color: 'rgba(255,255,255,0.7)',
-            marginBottom: 24,
+            color: 'rgba(255,255,255,0.5)',
             lineHeight: 1.6
           }}>
-            {error || 'No tiene autorizacion para acceder a este sistema.'}
+            No tiene autorizacion para acceder a este sistema.
           </p>
-          
-          <div style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 12,
-            padding: 20,
-            marginBottom: 24,
-            textAlign: 'left'
-          }}>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
-              Formato de URL requerido:
-            </p>
-            <code style={{
-              display: 'block',
-              background: 'rgba(0,0,0,0.3)',
-              padding: 12,
-              borderRadius: 8,
-              fontSize: 12,
-              color: '#00d4aa',
-              wordBreak: 'break-all',
-              fontFamily: 'monospace'
-            }}>
-              ?user=%7B%22USUARIO%22%3A%22Marco%20Cruger%22%2C%22ROL%22%3A%22admin%22%7D
-            </code>
-          </div>
-          
-          <button
-            onClick={logout}
-            style={{
-              background: '#ef4444',
-              color: 'white',
-              border: 'none',
-              padding: '12px 32px',
-              borderRadius: 8,
-              fontSize: 16,
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-            onMouseOver={(e) => e.target.style.background = '#dc2626'}
-            onMouseOut={(e) => e.target.style.background = '#ef4444'}
-          >
-            Reintentar
-          </button>
         </div>
       </div>
     )
