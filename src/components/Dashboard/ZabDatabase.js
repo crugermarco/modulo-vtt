@@ -169,7 +169,7 @@ function ZabDatabase({ tableName, title, duplicateZabs }) {
           </div>
         ) : filteredZabs.length === 0 ? (
           <div className="empty-state">
-            <span className="empty-icon">🔢</span>
+            <span className="empty-icon"></span>
             <h3>No hay ZABs {filter !== 'all' ? (filter === 'available' ? 'disponibles' : 'utilizados') : ''}</h3>
             <p>Utilice el botón "Generar ZAB" para crear nuevos códigos</p>
           </div>
