@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabaseStatus } from '../../services/supabaseClient'
 
 export default function SystemGuard({ moduloId, children }) {
@@ -6,6 +6,28 @@ export default function SystemGuard({ moduloId, children }) {
   const [loading, setLoading] = useState(true)
 
   const APP_URL = window.location.origin + window.location.pathname
+
+  const verificarAcceso = useCallback(async () => {
+    try {
+      const { data } = await supabaseStatus
+        .from('modulos_status')
+        .select('status')
+        .eq('modulo_id', moduloId)
+        .single()
+
+      if (data?.status !== 500) {
+        window.location.href = `https://status-ten-sage.vercel.app?modulo=${moduloId}&redirect=${encodeURIComponent(APP_URL)}`
+        return
+      }
+
+      setAccesoPermitido(true)
+      setLoading(false)
+    } catch (error) {
+      console.warn('Error verificando status, permitiendo acceso:', error.message)
+      setAccesoPermitido(true)
+      setLoading(false)
+    }
+  }, [moduloId, APP_URL])
 
   useEffect(() => {
     verificarAcceso()
@@ -33,30 +55,7 @@ export default function SystemGuard({ moduloId, children }) {
     return () => {
       channel.unsubscribe()
     }
-  }, [moduloId])
-
-  const verificarAcceso = async () => {
-    try {
-      const { data } = await supabaseStatus
-        .from('modulos_status')
-        .select('status')
-        .eq('modulo_id', moduloId)
-        .single()
-
-      if (data?.status !== 500) {
-        window.location.href = `https://status-ten-sage.vercel.app?modulo=${moduloId}&redirect=${encodeURIComponent(APP_URL)}`
-        return
-      }
-
-      setAccesoPermitido(true)
-      setLoading(false)
-    } catch (error) {
-      // Si hay error de conexion, permitir acceso para no bloquear
-      console.warn('Error verificando status, permitiendo acceso:', error.message)
-      setAccesoPermitido(true)
-      setLoading(false)
-    }
-  }
+  }, [moduloId, APP_URL, verificarAcceso])
 
   if (loading) {
     return (
