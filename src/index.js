@@ -4,13 +4,16 @@ import './styles/variables.css'
 import './styles/global.css'
 import './styles/shimmer.css'
 import { AuthProvider } from './context/AuthContext'
+import SystemGuard from './components/SystemGuard/SystemGuard'
 import App from './App'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <SystemGuard moduloId="modulo-vtt">
+        <App />
+      </SystemGuard>
     </AuthProvider>
   </React.StrictMode>
 )
