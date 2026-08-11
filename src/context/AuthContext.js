@@ -21,26 +21,60 @@ export const AuthProvider = ({ children }) => {
       const userParam = urlParams.get('user')
       
       if (userParam) {
-        const decodedUser = decodeURIComponent(userParam)
-        const user = JSON.parse(decodedUser)
+        let decodedUser
         
-        if (!user.USUARIO || !user.ROL) {
+        try {
+          // Intentar decodificar y parsear
+          decodedUser = decodeURIComponent(userParam)
+          // Si empieza con { es JSON, parsearlo
+          if (decodedUser.trim().startsWith('{')) {
+            decodedUser = JSON.parse(decodedUser)
+          }
+        } catch {
           setError('ACCESO DENEGADO')
           setLoading(false)
           return
         }
         
+        // Validar que tenga USUARIO
+        if (!decodedUser.USUARIO) {
+          setError('ACCESO DENEGADO')
+          setLoading(false)
+          return
+        }
+        
+        // Si no tiene ROL, asignar 'user' por defecto
         const userData = {
-          USUARIO: user.USUARIO,
-          ROL: user.ROL,
-          EMAIL: user.EMAIL || ''
+          USUARIO: decodedUser.USUARIO,
+          ROL: decodedUser.ROL || 'user',
+          EMAIL: decodedUser.email || decodedUser.EMAIL || '',
+          rotaciones: decodedUser.rotaciones || false,
+          vencimientos: decodedUser.vencimientos || false,
+          wunder: decodedUser.wunder || false,
+          empleados: decodedUser.empleados || false,
+          reportes: decodedUser.reportes || false,
+          enfermeria: decodedUser.enfermeria || false,
+          produccion: decodedUser.produccion || false,
+          bitacoras: decodedUser.bitacoras || false,
+          configuracion: decodedUser.configuracion || false
         }
         
         localStorage.setItem('userSession', JSON.stringify(userData))
         setCurrentUser({
           name: userData.USUARIO,
           role: userData.ROL,
-          email: userData.EMAIL
+          email: userData.EMAIL,
+          permissions: {
+            rotaciones: userData.rotaciones,
+            vencimientos: userData.vencimientos,
+            wunder: userData.wunder,
+            empleados: userData.empleados,
+            reportes: userData.reportes,
+            enfermeria: userData.enfermeria,
+            produccion: userData.produccion,
+            bitacoras: userData.bitacoras,
+            configuracion: userData.configuracion
+          }
         })
         
         window.history.replaceState({}, document.title, window.location.pathname)
@@ -48,12 +82,13 @@ export const AuthProvider = ({ children }) => {
         return
       }
       
+      // Intentar obtener de localStorage
       const userSession = localStorage.getItem('userSession')
       
       if (userSession) {
         const user = JSON.parse(userSession)
         
-        if (!user.USUARIO || !user.ROL) {
+        if (!user.USUARIO) {
           localStorage.removeItem('userSession')
           setError('ACCESO DENEGADO')
           setLoading(false)
@@ -62,8 +97,19 @@ export const AuthProvider = ({ children }) => {
         
         setCurrentUser({
           name: user.USUARIO,
-          role: user.ROL,
-          email: user.EMAIL || ''
+          role: user.ROL || 'user',
+          email: user.EMAIL || '',
+          permissions: {
+            rotaciones: user.rotaciones || false,
+            vencimientos: user.vencimientos || false,
+            wunder: user.wunder || false,
+            empleados: user.empleados || false,
+            reportes: user.reportes || false,
+            enfermeria: user.enfermeria || false,
+            produccion: user.produccion || false,
+            bitacoras: user.bitacoras || false,
+            configuracion: user.configuracion || false
+          }
         })
         setLoading(false)
         return
@@ -98,6 +144,11 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = useCallback(() => {
     if (!currentUser) return false
     return currentUser.role === 'admin' || currentUser.name?.toLowerCase() === 'marco cruger'
+  }, [currentUser])
+
+  const hasPermission = useCallback((permission) => {
+    if (!currentUser) return false
+    return currentUser.permissions?.[permission] === 'true' || currentUser.permissions?.[permission] === true
   }, [currentUser])
 
   const logout = useCallback(() => {
@@ -162,22 +213,10 @@ export const AuthProvider = ({ children }) => {
           }}>
             !
           </div>
-          
-          <h1 style={{ 
-            fontSize: 24, 
-            fontWeight: 700, 
-            color: '#ef4444',
-            marginBottom: 16,
-            letterSpacing: 2
-          }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#ef4444', marginBottom: 16, letterSpacing: 2 }}>
             ACCESO DENEGADO
           </h1>
-          
-          <p style={{ 
-            fontSize: 16, 
-            color: 'rgba(255,255,255,0.5)',
-            lineHeight: 1.6
-          }}>
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
             No tiene autorizacion para acceder a este sistema.
           </p>
         </div>
@@ -194,6 +233,7 @@ export const AuthProvider = ({ children }) => {
       canEdit,
       canDelete,
       isAdmin,
+      hasPermission,
       logout
     }}>
       {children}
