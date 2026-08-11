@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient'
+﻿import { supabase } from './supabaseClient'
 
 export const towerSentService = {
   async getAll() {
@@ -83,7 +83,7 @@ export const towerSentService = {
     const cleanFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_')
     const fileName = `${towerId}_${timestamp}_${cleanFileName}`
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('tower-images')
       .upload(fileName, file, {
         cacheControl: '3600',

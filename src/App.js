@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+﻿import React, { useState, useCallback } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import MainLayout from './components/Layout/MainLayout'
@@ -9,20 +9,8 @@ import { subscribeToZabChanges } from './services/supabaseClient'
 import './App.css'
 
 function App() {
-  const { currentUser } = useAuth()
+  useAuth()
   const [duplicateAlerts, setDuplicateAlerts] = useState([])
-
-  React.useEffect(() => {
-    const unsubscribe = subscribeToZabChanges((payload) => {
-      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-        checkForDuplicates(payload.new.zab_number)
-      }
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [])
 
   const checkForDuplicates = useCallback(async (zabNumber) => {
     try {
@@ -54,6 +42,18 @@ function App() {
     }
   }, [])
 
+  React.useEffect(() => {
+    const unsubscribe = subscribeToZabChanges((payload) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        checkForDuplicates(payload.new.zab_number)
+      }
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [checkForDuplicates])
+
   const dismissAlert = useCallback((alertId) => {
     setDuplicateAlerts(prev => prev.filter(a => a.id !== alertId))
   }, [])
@@ -78,58 +78,35 @@ function App() {
               <div key={alert.id} className="alert-item pulse-notification">
                 <span className="alert-icon">!</span>
                 <span className="alert-message">{alert.message}: {alert.zabNumber}</span>
-                <button 
-                  className="alert-dismiss"
-                  onClick={() => dismissAlert(alert.id)}
-                >
-                  X
-                </button>
+                <button className="alert-dismiss" onClick={() => dismissAlert(alert.id)}>X</button>
               </div>
             ))}
           </div>
         )}
 
         <Routes>
-          <Route 
-            path="/" 
-            element={
-              <MainLayout>
-                <TowerSent duplicateZabs={duplicateAlerts.map(a => a.zabNumber)} />
-              </MainLayout>
-            } 
-          />
-          <Route 
-            path="/tower-sent" 
-            element={
-              <MainLayout>
-                <TowerSent duplicateZabs={duplicateAlerts.map(a => a.zabNumber)} />
-              </MainLayout>
-            } 
-          />
-          <Route 
-            path="/zab-database-normal" 
-            element={
-              <MainLayout>
-                <ZabDatabase 
-                  tableName="zab_database_normal"
-                  title="ZAB DATA BASE - NORMAL"
-                  duplicateZabs={duplicateAlerts.map(a => a.zabNumber)}
-                />
-              </MainLayout>
-            } 
-          />
-          <Route 
-            path="/zab-database-ada" 
-            element={
-              <MainLayout>
-                <ZabDatabase 
-                  tableName="zab_database_ada"
-                  title="ZAB DATA BASE - ADA"
-                  duplicateZabs={duplicateAlerts.map(a => a.zabNumber)}
-                />
-              </MainLayout>
-            } 
-          />
+          <Route path="/" element={
+            <MainLayout>
+              <TowerSent duplicateZabs={duplicateAlerts.map(a => a.zabNumber)} />
+            </MainLayout>
+          } />
+          <Route path="/tower-sent" element={
+            <MainLayout>
+              <TowerSent duplicateZabs={duplicateAlerts.map(a => a.zabNumber)} />
+            </MainLayout>
+          } />
+          <Route path="/zab-database-normal" element={
+            <MainLayout>
+              <ZabDatabase tableName="zab_database_normal" title="ZAB DATA BASE - NORMAL"
+                duplicateZabs={duplicateAlerts.map(a => a.zabNumber)} />
+            </MainLayout>
+          } />
+          <Route path="/zab-database-ada" element={
+            <MainLayout>
+              <ZabDatabase tableName="zab_database_ada" title="ZAB DATA BASE - ADA"
+                duplicateZabs={duplicateAlerts.map(a => a.zabNumber)} />
+            </MainLayout>
+          } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
