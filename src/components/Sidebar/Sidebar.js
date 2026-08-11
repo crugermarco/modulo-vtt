@@ -108,27 +108,7 @@ function Sidebar({ collapsed, onToggle }) {
                 {canDelete() ? 'Administrador' : 'Usuario'}
               </span>
             </div>
-            <button 
-              className="btn-logout" 
-              onClick={logout} 
-              title="Cerrar sesion"
-              style={{
-                background: 'none',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: 'white',
-                borderRadius: '50%',
-                width: '28px',
-                height: '28px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: '8px'
-              }}
-            >
-            
-            </button>
+
           </div>
         )}
       </div>
