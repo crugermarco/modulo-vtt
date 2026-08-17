@@ -22,6 +22,7 @@ function ModalShipping({ isOpen, onClose }) {
   const [images, setImages] = useState({})
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -50,6 +51,7 @@ function ModalShipping({ isOpen, onClose }) {
       setImages({})
       setErrors({})
       setLoading(false)
+      setShowConfirm(false)
     }
   }, [isOpen])
 
@@ -89,7 +91,8 @@ function ModalShipping({ isOpen, onClose }) {
     setImages(prev => { const n = { ...prev }; delete n[index]; return n })
   }, [])
 
-  const handleSubmit = async (e) => {
+  // Primera validación al hacer clic en ENVIAR
+  const handleSubmitClick = (e) => {
     e.preventDefault()
 
     const validation = validators.validateShippingForm({ ...formData, rows })
@@ -109,7 +112,16 @@ function ModalShipping({ isOpen, onClose }) {
       return
     }
 
+    // Mostrar modal de confirmación
+    setShowConfirm(true)
+  }
+
+  // Procesar envío real después de confirmar
+  const handleConfirmSubmit = async () => {
+    setShowConfirm(false)
     setLoading(true)
+
+    const unitsPerPallet = parseInt(formData.unitsPerPallet) || 0
 
     try {
       const towerRecords = rows.slice(0, unitsPerPallet).map((row) => ({
@@ -148,6 +160,7 @@ function ModalShipping({ isOpen, onClose }) {
       setRows([])
       setImages({})
       setErrors({})
+      setShowConfirm(false)
       onClose()
 
     } catch (error) {
@@ -177,7 +190,7 @@ function ModalShipping({ isOpen, onClose }) {
               <button className="modal-close" onClick={onClose} type="button">X</button>
             </div>
 
-            <form onSubmit={handleSubmit} className="modal-form">
+            <form onSubmit={handleSubmitClick} className="modal-form">
               <div className="form-grid">
                 <div className="form-group">
                   <label className="form-label">Customer:</label>
@@ -278,6 +291,51 @@ function ModalShipping({ isOpen, onClose }) {
           </div>
         </ShimmerWrapper>
       </div>
+
+      {/* Modal de confirmación */}
+      {showConfirm && (
+        <div className="confirm-overlay" onClick={() => setShowConfirm(false)}>
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-header">
+              <h3>CONFIRMAR ENVIO</h3>
+              <button className="confirm-close" onClick={() => setShowConfirm(false)}>X</button>
+            </div>
+            <div className="confirm-body">
+              <div className="confirm-icon">!</div>
+              <p className="confirm-message">
+                Esta seguro de enviar este pallet?<br/>
+                Esta accion no se puede deshacer.
+              </p>
+              <div className="confirm-summary">
+                <div className="summary-row">
+                  <span>Customer:</span>
+                  <strong>{formData.customer}</strong>
+                </div>
+                <div className="summary-row">
+                  <span>PO Number:</span>
+                  <strong>{formData.so}</strong>
+                </div>
+                <div className="summary-row">
+                  <span>Pallet Number:</span>
+                  <strong>{formData.palletNumber}</strong>
+                </div>
+                <div className="summary-row">
+                  <span>Unidades:</span>
+                  <strong>{formData.unitsPerPallet}</strong>
+                </div>
+              </div>
+            </div>
+            <div className="confirm-actions">
+              <button className="btn-confirm" onClick={handleConfirmSubmit} disabled={loading}>
+                {loading ? 'Procesando...' : 'CONFIRMAR ENVIO'}
+              </button>
+              <button className="btn-cancel-confirm" onClick={() => setShowConfirm(false)} disabled={loading}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
