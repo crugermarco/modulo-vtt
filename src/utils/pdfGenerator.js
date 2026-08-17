@@ -60,7 +60,7 @@ function createSheetHTML(formData, rows) {
   for (let i = 0; i < maxRows; i++) {
     const row = rows[i] || { ul: '', zabNumber: '', serialWunder: '' }
     rowsHTML += `
-            <tr style="height: 20px">
+            <tr style="height: 22px">
                 <td class="s11" dir="ltr">${row.ul || ''}</td>
                 <td class="s11" dir="ltr">${row.zabNumber || ''}</td>
                 <td class="s11" dir="ltr">${row.serialWunder || ''}</td>
@@ -69,7 +69,7 @@ function createSheetHTML(formData, rows) {
 
   for (let i = maxRows; i < 12; i++) {
     rowsHTML += `
-            <tr style="height: 20px">
+            <tr style="height: 22px">
                 <td class="s11" dir="ltr"></td>
                 <td class="s11" dir="ltr"></td>
                 <td class="s11" dir="ltr"></td>
@@ -91,10 +91,7 @@ function createSheetHTML(formData, rows) {
         }
         
         .s0 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
-            border-top: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             font-weight: bold;
@@ -105,9 +102,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s1 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             font-style: italic;
@@ -118,9 +113,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s2 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             color: #000000;
@@ -130,9 +123,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s3 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             font-weight: bold;
@@ -143,9 +134,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s4 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             color: #000000;
@@ -155,9 +144,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s5 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             color: #000000;
@@ -167,9 +154,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s6 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             color: #000000;
@@ -179,9 +164,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s7 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             font-style: italic;
@@ -192,9 +175,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s8 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             font-style: italic;
@@ -205,9 +186,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s9 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             font-style: italic;
@@ -218,9 +197,7 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s10 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             color: #000000;
@@ -230,83 +207,13 @@ function createSheetHTML(formData, rows) {
             padding: 4px 3px;
         }
         .s11 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
+            border: 1px SOLID #000000;
             background-color: #ffffff;
             text-align: center;
             font-weight: bold;
             color: #000000;
             font-family: Arial;
             font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
-        }
-        .s12 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
-            border-top: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-style: italic;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
-        }
-        .s13 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
-            border-top: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 12pt;
-            vertical-align: middle;
-            padding: 4px 3px;
-        }
-        .s14 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
-            border-top: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-weight: bold;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
-        }
-        .s15 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
-            border-top: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
-        }
-        .s16 {
-            border-bottom: 1px SOLID #000000;
-            border-right: 1px SOLID #000000;
-            border-left: 1px SOLID #000000;
-            border-top: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-style: italic;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 14pt;
             vertical-align: middle;
             padding: 4px 3px;
         }
@@ -318,20 +225,26 @@ function createSheetHTML(formData, rows) {
       </style>
     </head>
     <body>
-      <table class="waffle" style="width: 938px; table-layout: fixed;" cellspacing="0" cellpadding="0">
+      <table class="waffle" style="width: 100%; max-width: 938px;" cellspacing="0" cellpadding="0">
+        <colgroup>
+          <col style="width: 25%;">
+          <col style="width: 25%;">
+          <col style="width: 25%;">
+          <col style="width: 25%;">
+        </colgroup>
         <tbody>
           <tr style="height: 22px">
             <td class="s0" colspan="4">${customer}</td>
           </tr>
           <tr style="height: 22px">
-            <td class="s12">Total Units in P.O.:</td>
-            <td class="s12" colspan="2">Purchase Order Number:</td>
-            <td class="s12">Ship Date:</td>
+            <td class="s1">Total Units in P.O.:</td>
+            <td class="s1" colspan="2">Purchase Order Number:</td>
+            <td class="s1">Ship Date:</td>
           </tr>
           <tr style="height: 22px">
-            <td class="s13">${totalUnits}</td>
-            <td class="s14" colspan="2">${so}</td>
-            <td class="s15">${fecha}</td>
+            <td class="s2">${totalUnits}</td>
+            <td class="s3" colspan="2">${so}</td>
+            <td class="s4">${fecha}</td>
           </tr>
           <tr style="height: 22px">
             <td class="s1">Units per Pallet:</td>
@@ -344,7 +257,7 @@ function createSheetHTML(formData, rows) {
             <td class="s6">Beverage Dispensing Tower</td>
           </tr>
           <tr style="height: 22px">
-            <td class="s16">Pallet Number:</td>
+            <td class="s7">Pallet Number:</td>
             <td class="s8">Serial Number (ABC, Inc.):</td>
             <td class="s9">Bar Code Number (The Coca-Cola Co.):</td>
             <td class="s7">Serial Number</td>
