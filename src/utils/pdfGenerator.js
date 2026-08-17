@@ -3,13 +3,15 @@ import jsPDF from 'jspdf'
 
 export const generateShippingSheetPDF = async (formData, rows) => {
   const htmlContent = createSheetHTML(formData, rows)
-  
+
   const tempDiv = document.createElement('div')
   tempDiv.innerHTML = htmlContent
   tempDiv.style.position = 'absolute'
   tempDiv.style.left = '-9999px'
   tempDiv.style.top = '0'
   tempDiv.style.width = '1050px'
+  tempDiv.style.backgroundColor = '#ffffff'
+
   document.body.appendChild(tempDiv)
 
   try {
@@ -22,6 +24,7 @@ export const generateShippingSheetPDF = async (formData, rows) => {
     })
 
     const imgData = canvas.toDataURL('image/png')
+
     const pdf = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
@@ -30,12 +33,22 @@ export const generateShippingSheetPDF = async (formData, rows) => {
 
     const pdfWidth = pdf.internal.pageSize.getWidth()
     const pdfHeight = pdf.internal.pageSize.getHeight()
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST')
-    
+
+    pdf.addImage(
+      imgData,
+      'PNG',
+      0,
+      0,
+      pdfWidth,
+      pdfHeight,
+      undefined,
+      'FAST'
+    )
+
     const fileName = `Shipping_Sheet_${formData.so || 'envio'}_${Date.now()}.pdf`
+
     pdf.save(fileName)
-    
+
     return true
   } catch (error) {
     console.error('Error generando PDF:', error)
@@ -53,27 +66,28 @@ function createSheetHTML(formData, rows) {
   const type = formData.type || ''
   const palletNumber = formData.palletNumber || ''
   const unitsPerPallet = formData.unitsPerPallet || 1
-  const maxRows = Math.min(unitsPerPallet, 12)
 
   let rowsHTML = ''
-  
-  for (let i = 0; i < maxRows; i++) {
-    const row = rows[i] || { ul: '', zabNumber: '', serialWunder: '' }
-    rowsHTML += `
-            <tr style="height: 22px">
-                <td class="s11" dir="ltr">${row.ul || ''}</td>
-                <td class="s11" dir="ltr">${row.zabNumber || ''}</td>
-                <td class="s11" dir="ltr">${row.serialWunder || ''}</td>
-            </tr>`
-  }
 
-  for (let i = maxRows; i < 12; i++) {
+  for (let i = 0; i < 12; i++) {
+    const row = rows[i] || {
+      ul: '',
+      zabNumber: '',
+      serialWunder: ''
+    }
+
     rowsHTML += `
-            <tr style="height: 22px">
-                <td class="s11" dir="ltr"></td>
-                <td class="s11" dir="ltr"></td>
-                <td class="s11" dir="ltr"></td>
-            </tr>`
+      <tr style="height: 22px;">
+        ${
+          i === 0
+            ? `<td class="s10" rowspan="12">${palletNumber}</td>`
+            : ''
+        }
+        <td class="s11" dir="ltr">${row.ul || ''}</td>
+        <td class="s11" dir="ltr">${row.zabNumber || ''}</td>
+        <td class="s11" dir="ltr">${row.serialWunder || ''}</td>
+      </tr>
+    `
   }
 
   return `
@@ -81,191 +95,283 @@ function createSheetHTML(formData, rows) {
     <html>
     <head>
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
       <style type="text/css">
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-          font-family: 'Times New Roman', Arial, sans-serif; 
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          background: #ffffff;
+        }
+
+        body {
+          font-family: 'Times New Roman', Arial, sans-serif;
           background: #ffffff;
           padding: 40px 56px;
-          margin: 0;
         }
-        
+
         .s0 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-weight: bold;
-            color: #000000;
-            font-family: Arial;
-            font-size: 12pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          font-weight: bold;
+          color: #000000;
+          font-family: Arial;
+          font-size: 12pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s1 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-style: italic;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          font-style: italic;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 16pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s2 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 12pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 12pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s3 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-weight: bold;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          font-weight: bold;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 16pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s4 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 16pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s5 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 10pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 10pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s6 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 16pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s7 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-style: italic;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 14pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          font-style: italic;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 14pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s8 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-style: italic;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 14pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          font-style: italic;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 14pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s9 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-style: italic;
-            color: #000000;
-            font-family: "Times New Roman";
-            font-size: 14pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          font-style: italic;
+          color: #000000;
+          font-family: "Times New Roman";
+          font-size: 14pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s10 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            color: #000000;
-            font-family: Arial;
-            font-size: 27pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          color: #000000;
+          font-family: Arial;
+          font-size: 27pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
+
         .s11 {
-            border: 1px SOLID #000000;
-            background-color: #ffffff;
-            text-align: center;
-            font-weight: bold;
-            color: #000000;
-            font-family: Arial;
-            font-size: 16pt;
-            vertical-align: middle;
-            padding: 4px 3px;
+          border: 1px solid #000000;
+          background-color: #ffffff;
+          text-align: center;
+          font-weight: bold;
+          color: #000000;
+          font-family: Arial;
+          font-size: 16pt;
+          vertical-align: middle;
+          padding: 4px 3px;
         }
-        
+
         .waffle {
-            border-collapse: collapse;
-            margin: 0 auto;
+          width: 100%;
+          max-width: 938px;
+          border-collapse: collapse;
+          border-spacing: 0;
+          margin: 0 auto;
+          table-layout: fixed;
+        }
+
+        .waffle col {
+          width: 25%;
+        }
+
+        .waffle td {
+          overflow: hidden;
         }
       </style>
     </head>
+
     <body>
-      <table class="waffle" style="width: 100%; max-width: 938px;" cellspacing="0" cellpadding="0">
+      <table
+        class="waffle"
+        cellspacing="0"
+        cellpadding="0"
+      >
         <colgroup>
           <col style="width: 25%;">
           <col style="width: 25%;">
           <col style="width: 25%;">
           <col style="width: 25%;">
         </colgroup>
+
         <tbody>
-          <tr style="height: 22px">
-            <td class="s0" colspan="4">${customer}</td>
+
+          <tr style="height: 22px;">
+            <td class="s0" colspan="4">
+              ${customer}
+            </td>
           </tr>
-          <tr style="height: 22px">
-            <td class="s1">Total Units in P.O.:</td>
-            <td class="s1" colspan="2">Purchase Order Number:</td>
-            <td class="s1">Ship Date:</td>
+
+          <tr style="height: 22px;">
+            <td class="s1">
+              Total Units in P.O.:
+            </td>
+
+            <td class="s1" colspan="2">
+              Purchase Order Number:
+            </td>
+
+            <td class="s1">
+              Ship Date:
+            </td>
           </tr>
-          <tr style="height: 22px">
-            <td class="s2">${totalUnits}</td>
-            <td class="s3" colspan="2">${so}</td>
-            <td class="s4">${fecha}</td>
+
+          <tr style="height: 22px;">
+            <td class="s2">
+              ${totalUnits}
+            </td>
+
+            <td class="s3" colspan="2">
+              ${so}
+            </td>
+
+            <td class="s4">
+              ${fecha}
+            </td>
           </tr>
-          <tr style="height: 22px">
-            <td class="s1">Units per Pallet:</td>
-            <td class="s1" colspan="2">Product Model:</td>
-            <td class="s1">Product Description:</td>
+
+          <tr style="height: 22px;">
+            <td class="s1">
+              Units per Pallet:
+            </td>
+
+            <td class="s1" colspan="2">
+              Product Model:
+            </td>
+
+            <td class="s1">
+              Product Description:
+            </td>
           </tr>
-          <tr style="height: 22px">
-            <td class="s5">${unitsPerPallet}</td>
-            <td class="s3" colspan="2">${type}</td>
-            <td class="s6">Beverage Dispensing Tower</td>
+
+          <tr style="height: 22px;">
+            <td class="s5">
+              ${unitsPerPallet}
+            </td>
+
+            <td class="s3" colspan="2">
+              ${type}
+            </td>
+
+            <td class="s6">
+              Beverage Dispensing Tower
+            </td>
           </tr>
-          <tr style="height: 22px">
-            <td class="s7">Pallet Number:</td>
-            <td class="s8">Serial Number (ABC, Inc.):</td>
-            <td class="s9">Bar Code Number (The Coca-Cola Co.):</td>
-            <td class="s7">Serial Number</td>
+
+          <tr style="height: 22px;">
+            <td class="s7">
+              Pallet Number:
+            </td>
+
+            <td class="s8">
+              Serial Number (ABC, Inc.):
+            </td>
+
+            <td class="s9">
+              Bar Code Number (The Coca-Cola Co.):
+            </td>
+
+            <td class="s7">
+              Serial Number
+            </td>
           </tr>
-          <tr style="height: 22px">
-            <td class="s10" rowspan="12">${palletNumber}</td>
-            ${rowsHTML.split('</tr>')[0]}</tr>
-          ${rowsHTML.split('</tr>').slice(1).join('</tr>')}
+
+          ${rowsHTML}
+
         </tbody>
       </table>
     </body>
