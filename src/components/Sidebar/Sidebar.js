@@ -5,7 +5,7 @@ import './Sidebar.css'
 
 function Sidebar({ collapsed, onToggle }) {
   const location = useLocation()
-  const { currentUser, canDelete, logout } = useAuth()
+  const { currentUser, canDelete } = useAuth()
 
   const menuItems = [
     {
