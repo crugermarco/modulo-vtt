@@ -123,31 +123,53 @@ function ModalShipping({ isOpen, onClose }) {
     return ulRegex.test(ul.trim())
   }
 
-  // Validar ZAB contra las bases de datos
+  // Validar ZAB: debe existir, estar disponible y no usado
   const validateZabInDatabase = (zabNumber) => {
     const isAdaModel = formData.type === 'WB-RT-4-N-ADA'
     const zabList = isAdaModel ? availableZabs.ada : availableZabs.normal
     
+    // availableZabs YA contiene solo ZABs con status='available'
+    // Por lo tanto si el ZAB está en la lista, NO ha sido utilizado
     if (!zabList.includes(zabNumber)) {
-      return false
+      return { 
+        valid: false, 
+        error: `ZAB ${zabNumber} no encontrado o ya fue utilizado en la base ${isAdaModel ? 'ADA' : 'NORMAL'}` 
+      }
     }
-    return true
+    return { valid: true, error: null }
   }
 
-  const handleSubmitClick = (e) => {
+  // Validar ZAB ya utilizado en tower_sent
+  const validateZabNotInTowerSent = async (zabNumber) => {
+    try {
+      const duplicates = await towerSentService.findDuplicates(zabNumber)
+      if (duplicates.length > 0) {
+        return { 
+          valid: false, 
+          error: `ZAB ${zabNumber} ya existe en TOWER SENT` 
+        }
+      }
+      return { valid: true, error: null }
+    } catch (error) {
+      console.error('Error validando tower_sent:', error)
+      return { valid: true, error: null }
+    }
+  }
+
+  const handleSubmitClick = async (e) => {
     e.preventDefault()
     const newErrors = {}
+    let hasErrors = false
 
     // Validar formulario base
     const validation = validators.validateShippingForm({ ...formData, rows })
     if (!validation.isValid) {
       Object.assign(newErrors, validation.errors)
+      hasErrors = true
     }
 
     const unitsPerPallet = parseInt(formData.unitsPerPallet) || 0
     const missingImages = []
-    let hasZabError = false
-    let hasULError = false
 
     // Validar cada fila
     for (let i = 0; i < unitsPerPallet; i++) {
@@ -156,15 +178,22 @@ function ModalShipping({ isOpen, onClose }) {
       // Validar formato UL
       if (row.ul && !validateULFormat(row.ul)) {
         newErrors[`row_${i}_ul`] = 'Formato requerido: XX-XXXX-XXX (ej: 90-6326-003)'
-        hasULError = true
+        hasErrors = true
       }
 
       // Validar ZAB en base de datos correspondiente
       if (row.zabNumber) {
-        if (!validateZabInDatabase(row.zabNumber)) {
-          const modelName = formData.type === 'WB-RT-4-N-ADA' ? 'ADA' : 'NORMAL'
-          newErrors[`row_${i}_zab`] = `ZAB ${row.zabNumber} no existe en la base ${modelName}`
-          hasZabError = true
+        const zabValidation = validateZabInDatabase(row.zabNumber)
+        if (!zabValidation.valid) {
+          newErrors[`row_${i}_zab`] = zabValidation.error
+          hasErrors = true
+        } else {
+          // Solo si pasó la primera validación, verificar tower_sent
+          const towerValidation = await validateZabNotInTowerSent(row.zabNumber)
+          if (!towerValidation.valid) {
+            newErrors[`row_${i}_zab`] = towerValidation.error
+            hasErrors = true
+          }
         }
       }
 
@@ -174,18 +203,15 @@ function ModalShipping({ isOpen, onClose }) {
       }
     }
 
-    if (hasULError) {
-      toast.error('Formato de UL incorrecto. Use: XX-XXXX-XXX (ej: 90-6326-003)')
-    }
-    if (hasZabError) {
-      toast.error(`ZAB no encontrado en la base ${formData.type === 'WB-RT-4-N-ADA' ? 'ADA' : 'NORMAL'}`)
-    }
     if (missingImages.length > 0) {
       toast.error(`Faltan imagenes en las filas: ${missingImages.join(', ')}`)
+      hasErrors = true
     }
 
-    if (Object.keys(newErrors).length > 0 || missingImages.length > 0) {
+    if (hasErrors) {
       setErrors(newErrors)
+      const firstError = Object.values(newErrors)[0]
+      toast.error(firstError || 'Corrige los errores antes de enviar')
       return
     }
 
