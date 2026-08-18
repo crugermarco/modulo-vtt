@@ -91,7 +91,6 @@ function ModalShipping({ isOpen, onClose }) {
     setImages(prev => { const n = { ...prev }; delete n[index]; return n })
   }, [])
 
-  // Primera validación al hacer clic en ENVIAR
   const handleSubmitClick = (e) => {
     e.preventDefault()
 
@@ -112,11 +111,9 @@ function ModalShipping({ isOpen, onClose }) {
       return
     }
 
-    // Mostrar modal de confirmación
     setShowConfirm(true)
   }
 
-  // Procesar envío real después de confirmar
   const handleConfirmSubmit = async () => {
     setShowConfirm(false)
     setLoading(true)
@@ -181,8 +178,8 @@ function ModalShipping({ isOpen, onClose }) {
   const displayRows = Math.min(parseInt(formData.unitsPerPallet) || 0, 12)
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <div className="modal-container">
         <ShimmerWrapper>
           <div className="modal-shipping">
             <div className="modal-header">
@@ -294,8 +291,8 @@ function ModalShipping({ isOpen, onClose }) {
 
       {/* Modal de confirmación */}
       {showConfirm && (
-        <div className="confirm-overlay" onClick={() => setShowConfirm(false)}>
-          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="confirm-overlay">
+          <div className="confirm-modal">
             <div className="confirm-header">
               <h3>CONFIRMAR ENVIO</h3>
               <button className="confirm-close" onClick={() => setShowConfirm(false)}>X</button>
