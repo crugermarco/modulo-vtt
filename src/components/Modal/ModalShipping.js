@@ -3,6 +3,7 @@ import ShimmerWrapper from './ShimmerWrapper'
 import { towerSentService } from '../../services/towerSentService'
 import { generateShippingSheetPDF } from '../../utils/pdfGenerator'
 import { validators } from '../../utils/validators'
+import { zabDatabaseService } from '../../services/zabDatabaseService'
 import toast from 'react-hot-toast'
 import './ModalShipping.css'
 
@@ -23,6 +24,31 @@ function ModalShipping({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [showConfirm, setShowConfirm] = useState(false)
+  const [availableZabs, setAvailableZabs] = useState({
+    normal: [],
+    ada: []
+  })
+
+  // Cargar ZABs disponibles al abrir el modal
+  useEffect(() => {
+    if (isOpen) {
+      loadAvailableZabs()
+    }
+  }, [isOpen])
+
+  const loadAvailableZabs = async () => {
+    try {
+      const normalZabs = await zabDatabaseService.getZabs('zab_database_normal')
+      const adaZabs = await zabDatabaseService.getZabs('zab_database_ada')
+      
+      setAvailableZabs({
+        normal: normalZabs.filter(z => z.status === 'available').map(z => z.zab_number),
+        ada: adaZabs.filter(z => z.status === 'available').map(z => z.zab_number)
+      })
+    } catch (error) {
+      console.error('Error cargando ZABs:', error)
+    }
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -91,23 +117,75 @@ function ModalShipping({ isOpen, onClose }) {
     setImages(prev => { const n = { ...prev }; delete n[index]; return n })
   }, [])
 
+  // Validar UL con formato 90-6326-003
+  const validateULFormat = (ul) => {
+    const ulRegex = /^\d{2}-\d{4}-\d{3}$/
+    return ulRegex.test(ul.trim())
+  }
+
+  // Validar ZAB contra las bases de datos
+  const validateZabInDatabase = (zabNumber) => {
+    const isAdaModel = formData.type === 'WB-RT-4-N-ADA'
+    const zabList = isAdaModel ? availableZabs.ada : availableZabs.normal
+    
+    if (!zabList.includes(zabNumber)) {
+      return false
+    }
+    return true
+  }
+
   const handleSubmitClick = (e) => {
     e.preventDefault()
+    const newErrors = {}
 
+    // Validar formulario base
     const validation = validators.validateShippingForm({ ...formData, rows })
     if (!validation.isValid) {
-      setErrors(validation.errors)
-      toast.error(Object.values(validation.errors)[0] || 'Complete todos los campos')
-      return
+      Object.assign(newErrors, validation.errors)
     }
 
     const unitsPerPallet = parseInt(formData.unitsPerPallet) || 0
     const missingImages = []
+    let hasZabError = false
+    let hasULError = false
+
+    // Validar cada fila
     for (let i = 0; i < unitsPerPallet; i++) {
-      if (!images[i]?.file) missingImages.push(i + 1)
+      const row = rows[i] || { ul: '', zabNumber: '', serialWunder: '' }
+
+      // Validar formato UL
+      if (row.ul && !validateULFormat(row.ul)) {
+        newErrors[`row_${i}_ul`] = 'Formato requerido: XX-XXXX-XXX (ej: 90-6326-003)'
+        hasULError = true
+      }
+
+      // Validar ZAB en base de datos correspondiente
+      if (row.zabNumber) {
+        if (!validateZabInDatabase(row.zabNumber)) {
+          const modelName = formData.type === 'WB-RT-4-N-ADA' ? 'ADA' : 'NORMAL'
+          newErrors[`row_${i}_zab`] = `ZAB ${row.zabNumber} no existe en la base ${modelName}`
+          hasZabError = true
+        }
+      }
+
+      // Validar imagen
+      if (!images[i]?.file) {
+        missingImages.push(i + 1)
+      }
+    }
+
+    if (hasULError) {
+      toast.error('Formato de UL incorrecto. Use: XX-XXXX-XXX (ej: 90-6326-003)')
+    }
+    if (hasZabError) {
+      toast.error(`ZAB no encontrado en la base ${formData.type === 'WB-RT-4-N-ADA' ? 'ADA' : 'NORMAL'}`)
     }
     if (missingImages.length > 0) {
       toast.error(`Faltan imagenes en las filas: ${missingImages.join(', ')}`)
+    }
+
+    if (Object.keys(newErrors).length > 0 || missingImages.length > 0) {
+      setErrors(newErrors)
       return
     }
 
@@ -210,8 +288,8 @@ function ModalShipping({ isOpen, onClose }) {
                 <div className="form-group">
                   <label className="form-label">Product Model:</label>
                   <select name="type" value={formData.type} onChange={handleInputChange} className="input-premium" disabled={loading}>
-                    <option value="WB-RT-4-N">WB-RT-4-N</option>
-                    <option value="WB-RT-4-N-ADA">WB-RT-4-N-ADA</option>
+                    <option value="WB-RT-4-N">WB-RT-4-N (NORMAL)</option>
+                    <option value="WB-RT-4-N-ADA">WB-RT-4-N-ADA (ADA)</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -241,7 +319,7 @@ function ModalShipping({ isOpen, onClose }) {
                         <tr>
                           <th>#</th>
                           <th>Serial Number (ABC, Inc.)</th>
-                          <th>Bar Code Number</th>
+                          <th>Bar Code Number (ZAB)</th>
                           <th>Serial Number</th>
                           <th>Formato (JPG)</th>
                         </tr>
@@ -250,12 +328,22 @@ function ModalShipping({ isOpen, onClose }) {
                         {rows.slice(0, displayRows).map((row, index) => (
                           <tr key={index}>
                             <td className="row-number">{index + 1}</td>
-                            <td><input type="text" value={row.ul || ''} onChange={(e) => handleRowChange(index, 'ul', e.target.value)}
-                              className="input-premium" placeholder={`UL ${index + 1}`} disabled={loading} /></td>
-                            <td><input type="text" value={row.zabNumber || ''} onChange={(e) => handleRowChange(index, 'zabNumber', e.target.value)}
-                              className="input-premium" placeholder={`ZAB${index + 1}`} disabled={loading} /></td>
-                            <td><input type="text" value={row.serialWunder || ''} onChange={(e) => handleRowChange(index, 'serialWunder', e.target.value)}
-                              className="input-premium" placeholder={`Serial ${index + 1}`} disabled={loading} /></td>
+                            <td>
+                              <input type="text" value={row.ul || ''} onChange={(e) => handleRowChange(index, 'ul', e.target.value)}
+                                className={`input-premium ${errors[`row_${index}_ul`] ? 'input-error' : ''}`} 
+                                placeholder="90-6326-003" disabled={loading} />
+                              {errors[`row_${index}_ul`] && <span className="error-text">{errors[`row_${index}_ul`]}</span>}
+                            </td>
+                            <td>
+                              <input type="text" value={row.zabNumber || ''} onChange={(e) => handleRowChange(index, 'zabNumber', e.target.value)}
+                                className={`input-premium ${errors[`row_${index}_zab`] ? 'input-error' : ''}`} 
+                                placeholder={`ZAB (${formData.type === 'WB-RT-4-N-ADA' ? 'ADA' : 'NORMAL'})`} disabled={loading} />
+                              {errors[`row_${index}_zab`] && <span className="error-text">{errors[`row_${index}_zab`]}</span>}
+                            </td>
+                            <td>
+                              <input type="text" value={row.serialWunder || ''} onChange={(e) => handleRowChange(index, 'serialWunder', e.target.value)}
+                                className="input-premium" placeholder={`Serial ${index + 1}`} disabled={loading} />
+                            </td>
                             <td>
                               <div className="image-upload">
                                 <input type="file" accept="image/jpeg,image/jpg" onChange={(e) => handleImageUpload(index, e.target.files[0])}
@@ -289,7 +377,6 @@ function ModalShipping({ isOpen, onClose }) {
         </ShimmerWrapper>
       </div>
 
-      {/* Modal de confirmación */}
       {showConfirm && (
         <div className="confirm-overlay">
           <div className="confirm-modal">
@@ -320,6 +407,10 @@ function ModalShipping({ isOpen, onClose }) {
                   <span>Unidades:</span>
                   <strong>{formData.unitsPerPallet}</strong>
                 </div>
+                <div className="summary-row">
+                  <span>Modelo:</span>
+                  <strong>{formData.type}</strong>
+                </div>
               </div>
             </div>
             <div className="confirm-actions">
@@ -336,6 +427,5 @@ function ModalShipping({ isOpen, onClose }) {
     </div>
   )
 }
-
 
 export default ModalShipping
