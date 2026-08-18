@@ -337,4 +337,5 @@ function ModalShipping({ isOpen, onClose }) {
   )
 }
 
+
 export default ModalShipping
